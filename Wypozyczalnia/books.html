@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Książki</title>
+        <meta charset="UTF-8">
+    </head>
+    <body>
+        <form>
+            <label for="title">Tytuł:</label>
+            <input type="text" name="title" id="title"/><br/>
+            <label for="author">Autor:</label>
+            <input type="text" name="author" id="author"/><br/>
+            <label for="description">Opis:</label>
+            <textarea name="description" id="description"></textarea><br/>
+            <button id="save-book-button">Zapisz</button>
+        </form>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Tytuł</th>
+                    <th>Autor</th>
+                    <th>Akcja</th>
+                </tr>
+            </thead>
+            <tbody id="books-table-body">
+            </tbody>
+        </table>
+        
+        
+        
+        <script src="https://code.jquery.com/jquery-2.2.4.js" 
+        integrity="sha256-iT6Q9iMJYuQiMWNd9lDyBUStIq/8PuOW33aOqmvFpqI=" 
+        crossorigin="anonymous"></script>
+       
+        <script>
+            
+            jQuery(function() {
+               getBooksList();
+            });
+            
+            function getBooksList() {
+                jQuery.ajax( {
+                  url: 'api/books.php',
+                  method: 'GET'
+               }).done(function(response) {
+                   var booksTableBody = jQuery('#books-table-body');
+                   booksTableBody.html("");
+                   var books = JSON.parse(response);
+                   books.forEach(function(book){
+                       var row = '<tr><td>'+book.title+'</td><td>'+book.author+'</td><td>'+
+                               '<button class="remove-book-button" data-book-id="'+book.id+'">Usuń</button></td></tr>';
+                       booksTableBody.append(row);
+                   });
+                   assignClickActionToRemoveBookButtons();
+               });
+            }
+            
+            function assignClickActionToRemoveBookButtons(){
+                jQuery('.remove-book-button').click(function() {
+                    var bookId = jQuery(this).attr('data-book-id');
+                    
+                    jQuery.ajax({
+                        url: 'api/books.php?id='+bookId,
+                       method: 'DELETE'
+                    }).done(function (response) {
+                       getBooksList();
+                    });
+        
+                });
+            }
+            
+            
+            jQuery(function() {
+               
+               jQuery('#save-book-button').click(function() {
+                   
+                   var title = jQuery('#title').val();
+                   var author = jQuery('#author').val();
+                   var description = jQuery('#description').val();
+                   
+                   jQuery.ajax({
+                       url: 'api/books.php',
+                       method: 'POST',
+                       data: {title:title, author:author, description:description}
+                   }).done(function(response) {
+                       getBooksList();
+                   });
+                   return false;
+               });
+            });
+            
+            
+        </script>
+    </body>
+</html>

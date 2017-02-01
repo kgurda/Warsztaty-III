@@ -9,3 +9,4 @@ $colors = [
     ];
 
 echo json_encode($colors);
+echo json_encode(true);
